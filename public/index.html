@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentora Mini App</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .dashboard {
+            text-align: center;
+        }
+        
+        .dashboard h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .card p {
+            margin: 0;
+            color: #666;
+        }
+        
+        .logout-btn {
+            background: #dc3545;
+        }
+        
+        .logout-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="app"></div>
+    </div>
+
+    <script>
+        // Mock data
+        const mockUsers = {
+            'parent@example.com': { email: 'parent@example.com', password: 'password123', role: 'parent', name: 'Parent User' },
+            'student@example.com': { email: 'student@example.com', password: 'password123', role: 'student', name: 'Student User' },
+            'mentor@example.com': { email: 'mentor@example.com', password: 'password123', role: 'mentor', name: 'Mentor User' }
+        };
+
+        const mockLessons = [
+            { id: 1, title: 'Mathematics - Algebra Basics', topic: 'Basic algebraic expressions', date: '2024-03-10', summary: 'Introduction to variables and equations' },
+            { id: 2, title: 'Physics - Motion', topic: 'Newton\'s laws of motion', date: '2024-03-12', summary: 'Understanding force and acceleration' },
+            { id: 3, title: 'English - Essay Writing', topic: 'Structure and composition', date: '2024-03-15', summary: 'How to write effective essays' }
+        ];
+
+        let currentUser = null;
+
+        function LoginScreen() {
+            return `
+                <div class="header">
+                    <h1>Mentora</h1>
+                    <p>Learning Platform</p>
+                </div>
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="btn">Login</button>
+                </form>
+                <div style="margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 8px;">
+                    <h4 style="margin: 0 0 10px 0;">Test Accounts:</h4>
+                    <p style="margin: 5px 0; font-size: 14px;"><strong>Parent:</strong> parent@example.com / password123</p>
+                    <p style="margin: 5px 0; font-size: 14px;"><strong>Student:</strong> student@example.com / password123</p>
+                    <p style="margin: 5px 0; font-size: 14px;"><strong>Mentor:</strong> mentor@example.com / password123</p>
+                </div>
+            `;
+        }
+
+        function DashboardScreen() {
+            const roleContent = {
+                parent: {
+                    title: 'Parent Dashboard',
+                    subtitle: 'Manage your children\'s learning',
+                    cards: [
+                        { title: 'Your Students', content: '2 active students' },
+                        { title: 'Lessons Available', content: '3 new lessons this week' },
+                        { title: 'Progress Reports', content: 'View student progress' }
+                    ]
+                },
+                student: {
+                    title: 'Student Dashboard',
+                    subtitle: 'Track your learning journey',
+                    cards: [
+                        { title: 'Current Lessons', content: '5 lessons in progress' },
+                        { title: 'Completed', content: '12 lessons finished' },
+                        { title: 'Next Session', content: 'Mathematics - Tomorrow 2PM' }
+                    ]
+                },
+                mentor: {
+                    title: 'Mentor Dashboard',
+                    subtitle: 'Manage your teaching sessions',
+                    cards: [
+                        { title: 'Assigned Students', content: '8 students' },
+                        { title: 'Upcoming Sessions', content: '3 sessions today' },
+                        { title: 'Lessons to Prepare', content: '2 lessons pending' }
+                    ]
+                }
+            };
+
+            const content = roleContent[currentUser.role];
+            
+            return `
+                <div class="dashboard">
+                    <h2>${content.title}</h2>
+                    <p style="color: #666; margin-bottom: 30px;">Welcome back, ${currentUser.name}!</p>
+                    <p style="color: #666; margin-bottom: 30px;">${content.subtitle}</p>
+                    
+                    ${content.cards.map(card => `
+                        <div class="card">
+                            <h3>${card.title}</h3>
+                            <p>${card.content}</p>
+                        </div>
+                    `).join('')}
+                    
+                    <h3 style="margin: 30px 0 15px 0;">Available Lessons</h3>
+                    ${mockLessons.map(lesson => `
+                        <div class="card" style="border-left-color: #28a745;">
+                            <h3>${lesson.title}</h3>
+                            <p><strong>Topic:</strong> ${lesson.topic}</p>
+                            <p><strong>Date:</strong> ${lesson.date}</p>
+                            <p><strong>Summary:</strong> ${lesson.summary}</p>
+                        </div>
+                    `).join('')}
+                    
+                    <button class="btn logout-btn" onclick="handleLogout()">Logout</button>
+                </div>
+            `;
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const user = mockUsers[email];
+            if (user && user.password === password) {
+                currentUser = user;
+                renderApp();
+            } else {
+                alert('Invalid credentials. Please try the test accounts shown below.');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            renderApp();
+        }
+
+        function renderApp() {
+            const app = document.getElementById('app');
+            app.innerHTML = currentUser ? DashboardScreen() : LoginScreen();
+        }
+
+        // Initialize app
+        renderApp();
+    </script>
+</body>
+</html>
