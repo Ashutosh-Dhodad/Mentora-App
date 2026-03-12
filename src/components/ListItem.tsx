@@ -17,14 +17,8 @@ const ListItem: React.FC<ListItemProps> = ({
   rightComponent,
   style,
 }) => {
-  const Component = onPress ? TouchableOpacity : View;
-  
-  return (
-    <Component
-      style={[styles.container, style]}
-      onPress={onPress}
-      disabled={!onPress}
-    >
+  const content = (
+    <>
       <View style={styles.content}>
         <Text style={styles.title}>{title}</Text>
         {subtitle && (
@@ -36,7 +30,24 @@ const ListItem: React.FC<ListItemProps> = ({
           {rightComponent}
         </View>
       )}
-    </Component>
+    </>
+  );
+
+  if (onPress) {
+    return (
+      <TouchableOpacity
+        style={[styles.container, style]}
+        onPress={onPress}
+      >
+        {content}
+      </TouchableOpacity>
+    );
+  }
+
+  return (
+    <View style={[styles.container, style]}>
+      {content}
+    </View>
   );
 };
 
